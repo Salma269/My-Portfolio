@@ -11,6 +11,9 @@ test.describe('public portfolio UX', () => {
     await expect(page.getByRole('heading', { name: /Salma Mohamed Sayed/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Selected Projects/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Technical Skills/i })).toBeVisible();
+    await expect(page.getByRole('navigation').getByText('Admin')).toHaveCount(0);
+    await expect(page.locator('.hero__meta a[href^="mailto:"]')).toHaveAttribute('href', /mailto:salmasayed269@gmail\.com/);
+    await expect(page.locator('.footer-cv-button')).toHaveAttribute('href', '/cv');
     await expect(page.locator('.hero-bg')).toBeVisible();
     await expect.poll(async () => page.locator('.hero-bg').evaluate((node) => getComputedStyle(node).pointerEvents)).toBe('none');
     if ((page.viewportSize()?.width ?? 0) >= 760) {
@@ -29,6 +32,17 @@ test.describe('public portfolio UX', () => {
 
     await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight * 0.45, behavior: 'instant' }));
     await expect(page.locator('#projects')).toBeVisible();
+    await expect(page.locator('.project-card__visual img').first()).toBeVisible();
+  });
+
+
+  test('serves the CV route and favicon asset', async ({ request, baseURL }) => {
+    const cvResponse = await request.get(`${baseURL}/cv`);
+    expect(cvResponse.ok()).toBeTruthy();
+    expect(cvResponse.headers()['content-type']).toContain('application/pdf');
+    const faviconResponse = await request.get(`${baseURL}/favicon.svg`);
+    expect(faviconResponse.ok()).toBeTruthy();
+    expect(faviconResponse.headers()['content-type']).toContain('image/svg+xml');
   });
 
   test('supports Arabic/RTL toggle without breaking layout', async ({ page }) => {
@@ -53,5 +67,10 @@ test.describe('admin CMS login', () => {
     await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page.getByRole('heading', { name: /Dashboard/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('.admin-header .eyebrow')).toHaveText(username);
+    await expect(page.getByText(/Visual editor/i)).toBeVisible();
+    await expect(page.locator('.json-editor')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Add project/i })).toBeVisible();
+    await expect(page.getByLabel(/Cover image URL/i)).toBeVisible();
+    await expect(page.getByLabel(/Gallery image URLs/i)).toBeVisible();
   });
 });

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-label="Beacon Overview">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111827"/><stop offset="1" stop-color="#020617"/></linearGradient><radialGradient id="glow" cx="72%" cy="22%" r="58%"><stop stop-color="#fb7185" stop-opacity=".45"/><stop offset="1" stop-color="#fb7185" stop-opacity="0"/></radialGradient></defs>
+  <rect width="960" height="600" rx="38" fill="url(#bg)"/>
+  <rect width="960" height="600" rx="38" fill="url(#glow)"/>
+  <circle cx="820" cy="92" r="90" fill="#38bdf8" opacity=".18"/>
+  <text x="74" y="98" fill="#fb7185" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="900" letter-spacing="4">SALMA PORTFOLIO</text>
+  <text x="74" y="154" fill="#f8fafc" font-family="Inter,Arial,sans-serif" font-size="54" font-weight="900">Beacon</text>
+  <text x="76" y="196" fill="#f8fafc" opacity=".72" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="600">Emergency mesh network · Overview</text>
+  <circle cx="165" cy="250" r="44" fill="#f8fafc" opacity=".10" stroke="#fb7185" stroke-width="3"/><circle cx="165" cy="250" r="12" fill="#fb7185"/><circle cx="410" cy="210" r="44" fill="#f8fafc" opacity=".10" stroke="#fb7185" stroke-width="3"/><circle cx="410" cy="210" r="12" fill="#fb7185"/><circle cx="660" cy="270" r="44" fill="#f8fafc" opacity=".10" stroke="#fb7185" stroke-width="3"/><circle cx="660" cy="270" r="12" fill="#fb7185"/><circle cx="520" cy="430" r="44" fill="#f8fafc" opacity=".10" stroke="#fb7185" stroke-width="3"/><circle cx="520" cy="430" r="12" fill="#fb7185"/><circle cx="265" cy="455" r="44" fill="#f8fafc" opacity=".10" stroke="#fb7185" stroke-width="3"/><circle cx="265" cy="455" r="12" fill="#fb7185"/><path d="M165 250 410 210 660 270 520 430 265 455 165 250" fill="none" stroke="#38bdf8" stroke-width="5" opacity=".75"/><rect x="405" y="275" width="120" height="210" rx="28" fill="#f8fafc" opacity=".12" stroke="#fb7185"/><circle cx="465" cy="445" r="10" fill="#fb7185"/>
+</svg>

@@ -12,7 +12,7 @@ import { pickLocalized, pickLocalizedArray } from '../../utils/localize';
 export function PortfolioPage() {
   const { t, i18n } = useTranslation();
   const locale = (i18n.language.startsWith('ar') ? 'ar' : 'en') as Locale;
-  const { content, source } = useContent();
+  const { content } = useContent();
 
   useEffect(() => {
     const elements = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
@@ -59,7 +59,7 @@ export function PortfolioPage() {
             </div>
             <div className="hero__meta" aria-label="Contact summary">
               <span>{pickLocalized(siteSettings.contact.location, locale, siteSettings.localeStatus, true)}</span>
-              <span>{siteSettings.contact.email}</span>
+              <a href={`mailto:${siteSettings.contact.email}`}>{siteSettings.contact.email}</a>
               <a href={siteSettings.contact.githubUrl} target="_blank" rel="noreferrer">GitHub</a>
             </div>
           </div>
@@ -89,7 +89,7 @@ export function PortfolioPage() {
       </main>
       <footer className="site-footer shell">
         <span>© 2026 Salma Mohamed Sayed</span>
-        <span>{source === 'fallback' ? 'Static fallback content' : 'CMS powered'}</span>
+        <a className="footer-cv-button" href="/cv" download>{t('actions.downloadCv')} <span aria-hidden="true">↗</span></a>
       </footer>
     </>
   );

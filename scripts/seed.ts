@@ -44,6 +44,18 @@ try {
     console.log(`✓ Seeded ${name} (${docs.length})`);
   }
 
+
+  let updatedProjectAssets = 0;
+  for (const project of seedContent.projects) {
+    if (!project.coverImage && project.gallery.length === 0) continue;
+    const result = await db.collection('projects').updateOne(
+      { slug: project.slug, $or: [{ coverImage: { $exists: false } }, { gallery: { $size: 0 } }] },
+      { $set: { coverImage: project.coverImage, gallery: project.gallery, updatedAt: now, updatedBy: 'asset-backfill' } },
+    );
+    updatedProjectAssets += result.modifiedCount;
+  }
+  console.log(updatedProjectAssets ? `✓ Added project visuals to ${updatedProjectAssets} project(s)` : '• Project visuals already present; skipped');
+
   const adminUsername = env.adminUsername?.toLowerCase();
   const adminPasswordHash = env.adminPasswordHash;
   if (adminUsername && adminPasswordHash) {

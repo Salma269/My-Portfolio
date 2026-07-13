@@ -62,6 +62,10 @@ Then validate responsive UI, theme transitions, RTL, API content, and admin logi
 bun run test:e2e
 ```
 
+## Public CV route
+
+The CV is served at `/cv` and redirects to the bundled `public/cv.pdf`; the footer uses this route for the download button. Admin remains accessible only by URL at `/admin`.
+
 ## Deployment notes
 
 - Vercel build command: `npm run build`

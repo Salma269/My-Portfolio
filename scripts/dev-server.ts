@@ -60,6 +60,12 @@ async function handleApi(req: IncomingMessage, res: ServerResponse, url: URL): P
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? `${host}:${port}`}`);
+  if (url.pathname === '/cv') {
+    res.statusCode = 302;
+    res.setHeader('Location', '/cv.pdf');
+    res.end();
+    return;
+  }
   if (url.pathname.startsWith('/api/')) {
     void handleApi(req, res, url);
     return;

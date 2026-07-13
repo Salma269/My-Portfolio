@@ -37,5 +37,24 @@
     }
   ],
   "installCommand": "npm ci",
-  "devCommand": "bun dev"
+  "devCommand": "bun dev",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "header",
+          "key": "x-forwarded-proto",
+          "value": "http"
+        }
+      ],
+      "destination": "https://salma-mohamed.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/cv",
+      "destination": "/cv.pdf",
+      "permanent": false
+    }
+  ]
 }

@@ -30,6 +30,7 @@ const base = {
 };
 
 const url = z.string().trim().url().max(2048).refine((value) => value.startsWith('https://'), 'Use HTTPS URLs only');
+const assetUrl = z.union([url, z.string().trim().regex(/^\/[A-Za-z0-9._~:/?#[\]@!$&'()*+,;=%-]+$/, 'Use a HTTPS URL or a root-relative asset path').max(2048)]);
 const optionalUrl = z.union([url, z.literal(''), z.undefined()]).transform((value) => (value ? value : undefined));
 
 export const siteSettingsSchema = z
@@ -127,7 +128,7 @@ export const skillSchema = z
 export const projectImageSchema = z
   .object({
     id: z.string().trim().min(1).max(80),
-    blobUrl: url,
+    blobUrl: assetUrl,
     pathname: z.string().trim().min(1).max(500),
     alt: localizedString,
     caption: optionalLocalizedString.optional(),

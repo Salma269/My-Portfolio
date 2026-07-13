@@ -181,6 +181,29 @@ export const skills: Skill[] = skillGroups.flatMap((group, groupIndex) =>
   })),
 );
 
+
+function projectVisuals(slug: string, title: string): Pick<Project, 'coverImage' | 'gallery'> {
+  const makeImage = (variant: 'cover' | 'architecture' | 'results', label: string, order: number): Project['gallery'][number] => {
+    const pathname = `project-assets/${slug}-${variant}.svg`;
+    return {
+      id: `${slug}-${variant}`,
+      blobUrl: `/${pathname}`,
+      pathname,
+      alt: { en: `${title} ${label} visual`, ar: `${title} ${label}` },
+      caption: { en: label, ar: label },
+      order,
+      width: 960,
+      height: 600,
+      mimeType: 'image/svg+xml',
+    };
+  };
+  const coverImage = makeImage('cover', 'overview', 1);
+  return {
+    coverImage,
+    gallery: [coverImage, makeImage('architecture', 'architecture', 2), makeImage('results', 'results', 3)],
+  };
+}
+
 export const projects: Project[] = [
   {
     slug: 'fotoflow-document-workflow-automation-platform',
@@ -215,7 +238,7 @@ export const projects: Project[] = [
     published: true,
     order: 1,
     visible: true,
-    gallery: [],
+    ...projectVisuals('fotoflow-document-workflow-automation-platform', 'FotoFlow'),
     localeStatus: draft,
   },
   {
@@ -241,7 +264,7 @@ export const projects: Project[] = [
     published: true,
     order: 2,
     visible: true,
-    gallery: [],
+    ...projectVisuals('beacon-app-peer-to-peer-emergency-network', 'Beacon'),
     localeStatus: draft,
   },
   {
@@ -267,7 +290,7 @@ export const projects: Project[] = [
     published: true,
     order: 3,
     visible: true,
-    gallery: [],
+    ...projectVisuals('stroke-prediction-machine-learning-pipeline', 'Stroke ML'),
     localeStatus: draft,
   },
   {
@@ -293,7 +316,7 @@ export const projects: Project[] = [
     published: true,
     order: 4,
     visible: true,
-    gallery: [],
+    ...projectVisuals('distributed-web-crawling-indexing-system', 'Crawler'),
     localeStatus: draft,
   },
   {
@@ -319,7 +342,7 @@ export const projects: Project[] = [
     published: true,
     order: 5,
     visible: true,
-    gallery: [],
+    ...projectVisuals('e-commerce-platform-for-cosmetics', 'Cosmetics Shop'),
     localeStatus: draft,
   },
   {
@@ -345,7 +368,7 @@ export const projects: Project[] = [
     published: true,
     order: 6,
     visible: true,
-    gallery: [],
+    ...projectVisuals('smart-home-system', 'Smart Home'),
     localeStatus: draft,
   },
   {
@@ -369,7 +392,7 @@ export const projects: Project[] = [
     published: true,
     order: 7,
     visible: true,
-    gallery: [],
+    ...projectVisuals('veri-fy-lint-verilog-linter', 'Veri-fy Lint'),
     localeStatus: draft,
   },
 ];

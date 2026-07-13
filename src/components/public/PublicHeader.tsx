@@ -42,7 +42,6 @@ export function PublicHeader({ siteSettings, locale }: Props) {
               {t(`nav.${item}`)}
             </a>
           ))}
-          <Link to="/admin">{t('nav.admin')}</Link>
         </div>
         <div className="nav__actions">
           <button className="pill-button" type="button" onClick={switchLanguage}>{t('actions.language')}</button>

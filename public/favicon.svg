@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Salma Mohamed Sayed favicon">
+  <defs>
+    <linearGradient id="g" x1="18" y1="16" x2="110" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2DD4BF"/>
+      <stop offset="0.55" stop-color="#0891B2"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0284C7" flood-opacity=".28"/></filter>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="#07111F"/>
+  <path d="M24 89V39c0-8 7-15 15-15h50c8 0 15 7 15 15v50c0 8-7 15-15 15H39c-8 0-15-7-15-15Z" fill="url(#g)" filter="url(#s)"/>
+  <path d="M41 81V49h12.5l10.2 16.4L73.8 49H86v32H74.8V65.9L67 78h-6.6l-7.9-12.1V81H41Z" fill="#F8FAFC"/>
+  <path d="M38 39h52" stroke="#B7F7EF" stroke-width="6" stroke-linecap="round" opacity=".75"/>
+  <circle cx="96" cy="34" r="8" fill="#38BDF8"/>
+</svg>

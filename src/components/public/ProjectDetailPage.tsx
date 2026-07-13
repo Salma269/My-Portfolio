@@ -32,6 +32,9 @@ export function ProjectDetailPage() {
         <Link className="text-link" to="/">← Back to portfolio</Link>
         <p className="eyebrow">{project.periodLabel}</p>
         <h1>{title}</h1>
+        {project.coverImage ? (
+          <img className="detail-hero-image" src={project.coverImage.blobUrl} alt={pickLocalized(project.coverImage.alt, locale, project.localeStatus, true)} />
+        ) : null}
         <p className="detail-page__lead">{pickLocalized(project.detailedDescription, locale, project.localeStatus)}</p>
         <div className="chip-list" aria-label={t('labels.technologies')}>
           {project.technologies.map((tech) => <span className="chip" key={tech}>{tech}</span>)}
