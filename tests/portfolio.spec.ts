@@ -83,6 +83,11 @@ test.describe('admin CMS login', () => {
     await expect(page.getByRole('heading', { name: /Content Studio/i })).toBeVisible();
     await expect(page.locator('.json-editor')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /Add project/i })).toBeVisible();
+    await expect(page.getByText(/Reorder cards by dragging/i)).toBeVisible();
+    const firstCollectionCard = page.locator('.sortable-row').first();
+    await expect(firstCollectionCard.getByRole('button', { name: /to reorder/i })).toBeVisible();
+    await expect(firstCollectionCard.getByRole('button', { name: /Move .* up/i })).toBeDisabled();
+    await expect(firstCollectionCard.getByRole('button', { name: /Move .* down/i })).toBeVisible();
     await expect(page.getByText(/Project media/i)).toBeVisible();
     await expect(page.getByText(/Images & cover/i)).toBeVisible();
     await expect(page.getByText('Attach image', { exact: true })).toBeVisible();

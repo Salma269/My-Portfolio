@@ -201,9 +201,11 @@ function CollectionEditor({ collection, content, onUpdate, onDirtyChange }: { co
       setDraft(createDefaultItem(collection, 1));
       return;
     }
+    const selected = items.find((item) => getItemId(item) === selectedId);
+    const next = selected ?? first;
     setMode('edit');
-    setSelectedId(getItemId(first));
-    setDraft(structuredClone(first));
+    setSelectedId(getItemId(next));
+    setDraft(structuredClone(next));
   }, [collection, items]);
 
   const ids = items.map((item, index) => getItemId(item) || String(index));
@@ -224,25 +226,43 @@ function CollectionEditor({ collection, content, onUpdate, onDirtyChange }: { co
     onDirtyChange(true);
   };
 
+  const persistOrder = async (reordered: EditableRecord[]) => {
+    const ordered = reordered.map((item, index) => ({ ...item, order: index + 1 }));
+    onUpdate({ ...content, [collection]: ordered } as PortfolioContent);
+
+    const selected = ordered.find((item) => getItemId(item) === selectedId);
+    if (selected && mode === 'edit') setDraft(structuredClone(selected));
+
+    const persistedIds = ordered.map((item) => getItemId(item)).filter((id) => /^[a-f\d]{24}$/i.test(id));
+    if (persistedIds.length !== ordered.length) {
+      onDirtyChange(true);
+      toast.message('Order updated locally. Save new items before it can be persisted.');
+      return;
+    }
+
+    const response = await fetch(`/api/admin/${collection}/reorder`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ orderedIds: persistedIds }),
+    });
+    if (!response.ok) throw new Error('Could not save order');
+    toast.success('Order saved');
+  };
+
+  const moveItem = async (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= items.length) return;
+    await persistOrder(arrayMove(items, index, target));
+  };
+
   const dragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const oldIndex = ids.indexOf(String(active.id));
     const newIndex = ids.indexOf(String(over.id));
     if (oldIndex < 0 || newIndex < 0) return;
-    const reordered = arrayMove(items, oldIndex, newIndex).map((item, index) => ({ ...item, order: index + 1 }));
-    onUpdate({ ...content, [collection]: reordered } as PortfolioContent);
-    const persistedIds = reordered.map((item) => getItemId(item)).filter((id) => /^[a-f\d]{24}$/i.test(id));
-    if (persistedIds.length === reordered.length) {
-      const response = await fetch(`/api/admin/${collection}/reorder`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ orderedIds: persistedIds }),
-      });
-      if (!response.ok) throw new Error('Could not save order');
-      toast.success('Order saved');
-    }
+    await persistOrder(arrayMove(items, oldIndex, newIndex));
   };
 
   const save = async () => {
@@ -304,11 +324,23 @@ function CollectionEditor({ collection, content, onUpdate, onDirtyChange }: { co
     <div className="collection-editor collection-editor--forms">
       <div className="collection-list-panel">
         <button className="primary-button admin-add-button" type="button" onClick={addNew}>{t('actions.add')} {collection.slice(0, -1)}</button>
+        <p className="collection-list-panel__hint">Reorder cards by dragging the handle or using the up/down buttons. Changes save instantly.</p>
         <DndContext sensors={sensors} onDragEnd={(event) => void dragEnd(event).catch((error: Error) => toast.error(error.message))}>
           <SortableContext items={ids} strategy={verticalListSortingStrategy}>
             <div className="sortable-list">
               {items.map((item, index) => (
-                <SortableRow key={getItemId(item) || index} id={getItemId(item) || String(index)} item={item} selected={getItemId(item) === selectedId && mode === 'edit'} onClick={() => selectItem(item)} />
+                <SortableRow
+                  key={getItemId(item) || index}
+                  id={getItemId(item) || String(index)}
+                  item={item}
+                  index={index}
+                  selected={getItemId(item) === selectedId && mode === 'edit'}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < items.length - 1}
+                  onClick={() => selectItem(item)}
+                  onMoveUp={() => void moveItem(index, -1).catch((error: Error) => toast.error(error.message))}
+                  onMoveDown={() => void moveItem(index, 1).catch((error: Error) => toast.error(error.message))}
+                />
               ))}
             </div>
           </SortableContext>
@@ -573,15 +605,43 @@ function LocalizedArrayFields({ label, value, onChange }: { label: string; value
   );
 }
 
-function SortableRow({ id, item, selected, onClick }: { id: string; item: EditableRecord; selected: boolean; onClick: () => void }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+function SortableRow({
+  id,
+  item,
+  index,
+  selected,
+  canMoveUp,
+  canMoveDown,
+  onClick,
+  onMoveUp,
+  onMoveDown,
+}: {
+  id: string;
+  item: EditableRecord;
+  index: number;
+  selected: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onClick: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
   const label = getItemLabel(item);
   return (
-    <button ref={setNodeRef} style={style} className={`sortable-row ${selected ? 'is-selected' : ''}`} type="button" onClick={onClick} {...attributes} {...listeners}>
-      <span>{label}</span>
-      <StatusBadge status={item.localeStatus?.ar} />
-    </button>
+    <article ref={setNodeRef} style={style} className={`sortable-row ${selected ? 'is-selected' : ''} ${isDragging ? 'is-dragging' : ''}`}>
+      <button className="sortable-row__select" type="button" onClick={onClick}>
+        <span className="sortable-row__order">#{index + 1}</span>
+        <span className="sortable-row__label">{label}</span>
+        <StatusBadge status={item.localeStatus?.ar} />
+      </button>
+      <div className="sortable-row__tools" aria-label={`${label} reorder controls`}>
+        <button className="sortable-row__drag pill-button" type="button" aria-label={`Drag ${label} to reorder`} title="Drag to reorder" {...attributes} {...listeners}>⋮⋮</button>
+        <button className="pill-button" type="button" aria-label={`Move ${label} up`} onClick={onMoveUp} disabled={!canMoveUp}>↑</button>
+        <button className="pill-button" type="button" aria-label={`Move ${label} down`} onClick={onMoveDown} disabled={!canMoveDown}>↓</button>
+      </div>
+    </article>
   );
 }
 
