@@ -575,23 +575,35 @@ a.secondary-button:hover,
   font-size: .86rem;
   line-height: 1.55;
 }
-.sortable-list { max-height: 760px; gap: .7rem; padding-inline-end: .15rem; }
+.sortable-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 760px;
+  gap: .7rem;
+  padding-inline-end: .15rem;
+}
 .sortable-row {
-  min-height: 86px;
+  min-height: auto;
   padding: .9rem .95rem;
   border-radius: var(--radius-md);
   line-height: 1.45;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   justify-content: stretch;
   gap: .75rem;
-  overflow: hidden;
+  overflow: visible;
 }
 .sortable-row .badge { flex-shrink: 0; }
 .sortable-row.is-dragging {
   opacity: .72;
   box-shadow: var(--shadow-hover);
+}
+.sortable-row__main {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: .75rem;
 }
 .sortable-row__select {
   width: 100%;
@@ -602,8 +614,8 @@ a.secondary-button:hover,
   padding: 0;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: .65rem;
+  align-items: start;
+  gap: .75rem;
   text-align: start;
 }
 .sortable-row__select:hover {
@@ -622,30 +634,34 @@ a.secondary-button:hover,
   font-weight: 900;
   font-size: .82rem;
 }
+.sortable-row__content {
+  min-width: 0;
+  display: grid;
+  gap: .45rem;
+}
 .sortable-row__label {
+  display: block;
   min-width: 0;
   overflow-wrap: break-word;
   word-break: normal;
   hyphens: auto;
 }
-.sortable-row__select .badge {
-  grid-column: 2;
-  grid-row: 2;
-  margin-top: .2rem;
-}
 .sortable-row__tools {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
-  justify-content: flex-end;
-  gap: .38rem;
+  gap: .45rem;
   width: 100%;
   min-width: 0;
 }
 .sortable-row__tools .pill-button {
-  min-width: 2.35rem;
-  min-height: 2.35rem;
-  padding: .45rem .55rem;
+  min-width: 0;
+  min-height: 2.5rem;
+  padding: .52rem .6rem;
+  justify-content: center;
+  color: var(--text);
+  font-size: .82rem;
+  font-weight: 900;
 }
 .sortable-row__tools .pill-button:disabled {
   opacity: .42;
@@ -655,8 +671,6 @@ a.secondary-button:hover,
 .sortable-row__drag {
   cursor: grab;
   touch-action: none;
-  letter-spacing: -.2em;
-  padding-inline: .7rem;
 }
 .sortable-row__drag:active {
   cursor: grabbing;

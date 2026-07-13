@@ -90,8 +90,16 @@ test.describe('admin CMS login', () => {
     await expect(firstCollectionCard.getByRole('button', { name: /Move .* down/i })).toBeVisible();
     await page.setViewportSize({ width: 390, height: 900 });
     const compactLabelBox = await firstCollectionCard.locator('.sortable-row__label').boundingBox();
+    const compactCardBox = await firstCollectionCard.boundingBox();
+    const compactDragBox = await firstCollectionCard.getByRole('button', { name: /to reorder/i }).boundingBox();
+    const compactUpBox = await firstCollectionCard.getByRole('button', { name: /Move .* up/i }).boundingBox();
+    const compactDownBox = await firstCollectionCard.getByRole('button', { name: /Move .* down/i }).boundingBox();
     expect(compactLabelBox?.width).toBeGreaterThan(120);
     expect(compactLabelBox?.height).toBeLessThan(110);
+    expect(compactDragBox?.width).toBeGreaterThan(40);
+    expect(compactUpBox?.width).toBeGreaterThan(40);
+    expect(compactDownBox?.width).toBeGreaterThan(40);
+    expect((compactDownBox?.y ?? 0) + (compactDownBox?.height ?? 0)).toBeLessThanOrEqual((compactCardBox?.y ?? 0) + (compactCardBox?.height ?? 0) + 1);
     await page.setViewportSize({ width: 1440, height: 1000 });
     await expect(page.getByText(/Project media/i)).toBeVisible();
     await expect(page.getByText(/Images & cover/i)).toBeVisible();

@@ -631,15 +631,19 @@ function SortableRow({
   const label = getItemLabel(item);
   return (
     <article ref={setNodeRef} style={style} className={`sortable-row ${selected ? 'is-selected' : ''} ${isDragging ? 'is-dragging' : ''}`}>
-      <button className="sortable-row__select" type="button" onClick={onClick}>
-        <span className="sortable-row__order">#{index + 1}</span>
-        <span className="sortable-row__label">{label}</span>
-        <StatusBadge status={item.localeStatus?.ar} />
-      </button>
-      <div className="sortable-row__tools" aria-label={`${label} reorder controls`}>
-        <button className="sortable-row__drag pill-button" type="button" aria-label={`Drag ${label} to reorder`} title="Drag to reorder" {...attributes} {...listeners}>⋮⋮</button>
-        <button className="pill-button" type="button" aria-label={`Move ${label} up`} onClick={onMoveUp} disabled={!canMoveUp}>↑</button>
-        <button className="pill-button" type="button" aria-label={`Move ${label} down`} onClick={onMoveDown} disabled={!canMoveDown}>↓</button>
+      <div className="sortable-row__main">
+        <button className="sortable-row__select" type="button" onClick={onClick}>
+          <span className="sortable-row__order">#{index + 1}</span>
+          <span className="sortable-row__content">
+            <span className="sortable-row__label">{label}</span>
+            <StatusBadge status={item.localeStatus?.ar} />
+          </span>
+        </button>
+        <div className="sortable-row__tools" aria-label={`${label} reorder controls`}>
+          <button className="sortable-row__drag pill-button" type="button" aria-label={`Drag ${label} to reorder`} title="Drag to reorder" {...attributes} {...listeners}>Drag</button>
+          <button className="pill-button" type="button" aria-label={`Move ${label} up`} onClick={onMoveUp} disabled={!canMoveUp}>Up</button>
+          <button className="pill-button" type="button" aria-label={`Move ${label} down`} onClick={onMoveDown} disabled={!canMoveDown}>Down</button>
+        </div>
       </div>
     </article>
   );
