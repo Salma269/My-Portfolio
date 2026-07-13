@@ -26,8 +26,8 @@ const deleteMediaSchema = z.object({ pathname: z.string().min(1), projectId: z.s
 
 function routeParts(req: VercelRequest): string[] {
   const path = req.query.path;
-  if (Array.isArray(path)) return path.filter(Boolean);
-  return path ? [path] : [];
+  if (Array.isArray(path)) return path.flatMap((part) => part.split('/')).filter(Boolean);
+  return path ? path.split('/').filter(Boolean) : [];
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
