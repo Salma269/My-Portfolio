@@ -44,18 +44,25 @@ try {
     console.log(`✓ Seeded ${name} (${docs.length})`);
   }
 
-  const adminCount = await db.collection('adminUsers').countDocuments();
-  if (adminCount === 0 && env.adminEmail && env.adminPasswordHash) {
-    await db.collection('adminUsers').insertOne({
-      email: env.adminEmail.toLowerCase(),
-      passwordHash: env.adminPasswordHash,
-      createdAt: now,
-    });
-    console.log('✓ Bootstrapped admin user');
-  } else if (adminCount === 0) {
-    console.log('• No admin user created. Set ADMIN_EMAIL and ADMIN_PASSWORD_HASH, then rerun npm run seed.');
+  const adminUsername = env.adminUsername?.toLowerCase();
+  const adminPasswordHash = env.adminPasswordHash;
+  if (adminUsername && adminPasswordHash) {
+    await db.collection('adminUsers').updateOne(
+      { username: adminUsername },
+      {
+        $set: {
+          username: adminUsername,
+          email: env.adminEmail?.toLowerCase(),
+          passwordHash: adminPasswordHash,
+          updatedAt: now,
+        },
+        $setOnInsert: { createdAt: now },
+      },
+      { upsert: true },
+    );
+    console.log(`✓ Bootstrapped admin user: ${adminUsername}`);
   } else {
-    console.log(`• adminUsers has ${adminCount} doc(s); skipped`);
+    console.log('• No admin user created. Set ADMIN_USERNAME and ADMIN_PASSWORD_HASH, then rerun bun run seed.');
   }
 
   console.log('Done. Arabic content is stored as draft and can be approved in the admin CMS.');

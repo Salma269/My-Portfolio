@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HeroBackground } from './HeroBackground';
 import { PublicHeader } from './PublicHeader';
@@ -12,6 +13,27 @@ export function PortfolioPage() {
   const { t, i18n } = useTranslation();
   const locale = (i18n.language.startsWith('ar') ? 'ar' : 'en') as Locale;
   const { content, source } = useContent();
+
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+    if (!('IntersectionObserver' in window)) {
+      elements.forEach((element) => element.classList.add('is-visible'));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: '-8% 0px -10% 0px', threshold: 0.12 },
+    );
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [content]);
   const { siteSettings } = content;
   const orderedSections = Object.entries(siteSettings.sections)
     .filter(([, config]) => config.visible)
@@ -77,7 +99,7 @@ export function PortfolioPage() {
       <Section id="experience" title={t('sections.experience')} eyebrow="Training">
         <div className="timeline">
           {content.experiences.map((experience) => (
-            <article className="timeline-card" key={`${experience.title.en}-${experience.periodLabel}`}>
+            <article className="timeline-card reveal" key={`${experience.title.en}-${experience.periodLabel}`}>
               <div className="timeline-card__period">{experience.periodLabel}</div>
               <h3>{pickLocalized(experience.title, localeValue, experience.localeStatus)}</h3>
               <p className="timeline-card__org">{pickLocalized(experience.organization, localeValue, experience.localeStatus)}</p>
@@ -99,7 +121,7 @@ export function PortfolioPage() {
       <Section id="skills" title={t('sections.skills')} eyebrow="Stack">
         <div className="skills-grid">
           {(Object.keys(grouped) as SkillCategoryKey[]).map((category) => (
-            <article className="skill-card" key={category}>
+            <article className="skill-card reveal" key={category}>
               <h3>{skillCategoryLabels[category][localeValue]}</h3>
               <div className="chip-list">
                 {grouped[category].map((skill) => (
@@ -126,7 +148,7 @@ export function PortfolioPage() {
       <Section id="education" title={t('sections.education')} eyebrow="Academic">
         <div className="cards-grid cards-grid--two">
           {content.education.map((item) => (
-            <article className="info-card" key={item.degree.en}>
+            <article className="info-card reveal" key={item.degree.en}>
               <h3>{pickLocalized(item.institution, localeValue, item.localeStatus)}</h3>
               <p>{pickLocalized(item.degree, localeValue, item.localeStatus)}</p>
               <div className="info-card__meta"><span>{t('labels.graduation')}: {item.graduationDate}</span>{item.gpa ? <span>{t('labels.gpa')}: {item.gpa}</span> : null}</div>
@@ -142,7 +164,7 @@ export function PortfolioPage() {
       <Section id="certifications" title={t('sections.certifications')} eyebrow="Credentials">
         <div className="cards-grid cards-grid--four">
           {content.certifications.map((item) => (
-            <article className="info-card" key={item.name.en}>
+            <article className="info-card reveal" key={item.name.en}>
               <h3>{pickLocalized(item.name, localeValue, item.localeStatus)}</h3>
               <p>{item.details ? pickLocalized(item.details, localeValue, item.localeStatus) : item.dateLabel}</p>
             </article>
@@ -155,7 +177,7 @@ export function PortfolioPage() {
 
 function Metric({ value, label }: { value: string; label: string }) {
   return (
-    <div className="metric">
+    <div className="metric reveal">
       <strong>{value}</strong>
       <span>{label}</span>
     </div>
@@ -164,7 +186,7 @@ function Metric({ value, label }: { value: string; label: string }) {
 
 function Section({ id, title, eyebrow, children }: { id: string; title: string; eyebrow: string; children: React.ReactNode }) {
   return (
-    <section className="section shell" id={id}>
+    <section className="section shell reveal" id={id}>
       <div className="section__heading">
         <p className="eyebrow">{eyebrow}</p>
         <h2>{title}</h2>

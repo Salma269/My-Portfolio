@@ -58,6 +58,7 @@ export const resources = {
       admin: {
         loginTitle: 'Admin CMS',
         loginSubtitle: 'Sign in to edit portfolio content, approve Arabic drafts, reorder sections, and manage project media.',
+        username: 'Username',
         email: 'Email',
         password: 'Password',
         signIn: 'Sign in',
@@ -129,6 +130,7 @@ export const resources = {
       admin: {
         loginTitle: 'إدارة المحتوى',
         loginSubtitle: 'سجّل الدخول لتعديل المحتوى واعتماد المسودات العربية وترتيب الأقسام وإدارة وسائط المشاريع.',
+        username: 'اسم المستخدم',
         email: 'البريد الإلكتروني',
         password: 'كلمة المرور',
         signIn: 'تسجيل الدخول',

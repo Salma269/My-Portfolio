@@ -15,10 +15,10 @@ Bilingual (English/Arabic), theme-aware portfolio for **Salma Mohamed Sayed**.
 ## Local setup
 
 ```bash
-npm install
+bun install
 cp .env.example .env
-npm run seed
-npm run dev
+bun run seed
+bun dev
 ```
 
 `.env` is intentionally gitignored. Add production secrets in Vercel Project Settings only.
@@ -28,23 +28,38 @@ npm run dev
 Generate a bcrypt hash for the admin password:
 
 ```bash
-npm run hash:password -- "your-strong-admin-password"
+bun run hash:password -- "your-strong-admin-password"
 ```
 
-Set `ADMIN_EMAIL` and `ADMIN_PASSWORD_HASH` in `.env` and Vercel, then run:
+Set `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` in `.env` and Vercel, then run:
 
 ```bash
-npm run seed
+bun run seed
 ```
 
 ## Scripts
 
 ```bash
-npm run dev         # Vite dev server
-npm run build       # TypeScript + production build
-npm run preview     # Preview dist/
-npm run typecheck   # TypeScript check
-npm run seed        # Idempotent MongoDB seed from CV content
+bun dev             # Local Vite SPA + Vercel-compatible API dev server
+bun run build       # TypeScript + production build
+bun run preview     # Preview dist/
+bun run typecheck   # TypeScript check
+bun run seed        # Idempotent MongoDB seed from CV content
+bun run test:e2e    # Playwright UI/API/admin smoke tests
+```
+
+## UX validation
+
+Run the app from the repository root with:
+
+```bash
+bun dev
+```
+
+Then validate responsive UI, theme transitions, RTL, API content, and admin login with:
+
+```bash
+bun run test:e2e
 ```
 
 ## Deployment notes

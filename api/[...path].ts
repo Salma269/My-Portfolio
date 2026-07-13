@@ -37,26 +37,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const parts = routeParts(req);
     const route = parts.join('/');
 
-    if (route === 'public/content' && req.method === 'GET') return getPublicContent(res);
-    if (parts[0] === 'public' && parts[1] === 'projects' && parts[2] && req.method === 'GET') return getPublicProject(res, parts[2]);
+    if (route === 'public/content' && req.method === 'GET') return await getPublicContent(res);
+    if (parts[0] === 'public' && parts[1] === 'projects' && parts[2] && req.method === 'GET') return await getPublicProject(res, parts[2]);
 
-    if (route === 'auth/login' && req.method === 'POST') return login(req, res);
+    if (route === 'auth/login' && req.method === 'POST') return await login(req, res);
     if (route === 'auth/logout' && req.method === 'POST') return logout(req, res);
     if (route === 'auth/session' && req.method === 'GET') return session(req, res);
 
-    if (route === 'contact' && req.method === 'POST') return contact(req, res);
+    if (route === 'contact' && req.method === 'POST') return await contact(req, res);
 
-    if (route === 'admin/content' && req.method === 'GET') return adminContent(req, res);
-    if (route === 'admin/site-settings' && req.method === 'PATCH') return patchSiteSettings(req, res);
-    if (route === 'admin/locale/approve' && req.method === 'PATCH') return approveLocale(req, res);
+    if (route === 'admin/content' && req.method === 'GET') return await adminContent(req, res);
+    if (route === 'admin/site-settings' && req.method === 'PATCH') return await patchSiteSettings(req, res);
+    if (route === 'admin/locale/approve' && req.method === 'PATCH') return await approveLocale(req, res);
     if (route === 'admin/locale/generate-draft' && req.method === 'POST') return generateDraft(req, res);
-    if (route === 'admin/media/upload' && req.method === 'POST') return uploadMedia(req, res);
-    if (parts[0] === 'admin' && parts[1] === 'media' && req.method === 'DELETE') return deleteMedia(req, res, parts[2]);
+    if (route === 'admin/media/upload' && req.method === 'POST') return await uploadMedia(req, res);
+    if (parts[0] === 'admin' && parts[1] === 'media' && req.method === 'DELETE') return await deleteMedia(req, res, parts[2]);
 
     if (parts[0] === 'admin' && parts[1] && isCollectionName(parts[1])) {
-      if (parts.length === 2) return collectionRoot(req, res, parts[1]);
-      if (parts[2] === 'reorder' && req.method === 'PATCH') return reorderCollection(req, res, parts[1]);
-      if (parts[2]) return collectionItem(req, res, parts[1], parts[2]);
+      if (parts.length === 2) return await collectionRoot(req, res, parts[1]);
+      if (parts[2] === 'reorder' && req.method === 'PATCH') return await reorderCollection(req, res, parts[1]);
+      if (parts[2]) return await collectionItem(req, res, parts[1], parts[2]);
     }
 
     return json(res, 404, { success: false, code: 'NOT_FOUND' });
@@ -82,10 +82,10 @@ async function login(req: VercelRequest, res: VercelResponse) {
   rateLimit(`login:${getIp(req)}`, 5, 15 * 60 * 1000);
   const body = loginSchema.parse(await parseBody(req));
   const db = await getDb();
-  const user = await validateAdmin(db, body.email, body.password);
+  const user = await validateAdmin(db, body.username, body.password);
   if (!user) return json(res, 401, { success: false, code: 'INVALID_CREDENTIALS' });
   setSessionCookie(res, signSession(user));
-  ok(res, { success: true, email: user.email });
+  ok(res, { success: true, username: user.username, email: user.email });
 }
 
 function logout(req: VercelRequest, res: VercelResponse) {
@@ -98,7 +98,7 @@ function session(req: VercelRequest, res: VercelResponse) {
   const admin = (() => {
     try { return requireAdmin(req); } catch { return null; }
   })();
-  ok(res, { authenticated: Boolean(admin), email: admin?.email });
+  ok(res, { authenticated: Boolean(admin), username: admin?.username, email: admin?.email });
 }
 
 async function contact(req: VercelRequest, res: VercelResponse) {
@@ -133,7 +133,7 @@ async function patchSiteSettings(req: VercelRequest, res: VercelResponse) {
   const admin = requireAdmin(req);
   const patch = siteSettingsPatchSchema.parse(await parseBody(req));
   const db = await getDb();
-  await db.collection<Record<string, unknown> & { _id: string }>('siteSettings').updateOne({ _id: 'main' }, { $set: withUpdateAudit(patch, admin.email) }, { upsert: true });
+  await db.collection<Record<string, unknown> & { _id: string }>('siteSettings').updateOne({ _id: 'main' }, { $set: withUpdateAudit(patch, admin.email ?? admin.username) }, { upsert: true });
   const doc = await db.collection<Record<string, unknown> & { _id: string }>('siteSettings').findOne({ _id: 'main' });
   ok(res, { success: true, siteSettings: normalizeDoc(doc) });
 }
@@ -144,10 +144,10 @@ async function approveLocale(req: VercelRequest, res: VercelResponse) {
   const body = approveSchema.parse(await parseBody(req));
   const db = await getDb();
   if (body.entity === 'siteSettings') {
-    await db.collection<Record<string, unknown> & { _id: string }>('siteSettings').updateOne({ _id: 'main' }, { $set: { 'localeStatus.ar': 'approved', updatedAt: new Date(), updatedBy: admin.email } });
+    await db.collection<Record<string, unknown> & { _id: string }>('siteSettings').updateOne({ _id: 'main' }, { $set: { 'localeStatus.ar': 'approved', updatedAt: new Date(), updatedBy: admin.email ?? admin.username } });
   } else {
     if (!body.id || !ObjectId.isValid(body.id)) return json(res, 400, { success: false, code: 'INVALID_ID' });
-    await db.collection(body.entity).updateOne({ _id: new ObjectId(body.id) }, { $set: { 'localeStatus.ar': 'approved', updatedAt: new Date(), updatedBy: admin.email } });
+    await db.collection(body.entity).updateOne({ _id: new ObjectId(body.id) }, { $set: { 'localeStatus.ar': 'approved', updatedAt: new Date(), updatedBy: admin.email ?? admin.username } });
   }
   ok(res, { success: true });
 }
@@ -168,7 +168,7 @@ async function collectionRoot(req: VercelRequest, res: VercelResponse, entity: k
   if (req.method === 'POST') {
     requireJson(req);
     const body = entitySchemas[entity].parse(await parseBody(req));
-    const result = await collection.insertOne(withAudit(body, admin.email));
+    const result = await collection.insertOne(withAudit(body, admin.email ?? admin.username));
     const doc = await collection.findOne({ _id: result.insertedId });
     return created(res, { success: true, item: normalizeDoc(doc) });
   }
@@ -180,7 +180,7 @@ async function reorderCollection(req: VercelRequest, res: VercelResponse, entity
   const admin = requireAdmin(req);
   const { orderedIds } = reorderSchema.parse(await parseBody(req));
   const db = await getDb();
-  await Promise.all(orderedIds.map((id, index) => db.collection(entity).updateOne({ _id: new ObjectId(id) }, { $set: withUpdateAudit({ order: index + 1 }, admin.email) })));
+  await Promise.all(orderedIds.map((id, index) => db.collection(entity).updateOne({ _id: new ObjectId(id) }, { $set: withUpdateAudit({ order: index + 1 }, admin.email ?? admin.username) })));
   ok(res, { success: true });
 }
 
@@ -192,7 +192,7 @@ async function collectionItem(req: VercelRequest, res: VercelResponse, entity: k
   if (req.method === 'PATCH') {
     requireJson(req);
     const patch = entitySchemas[entity].partial().strict().parse(await parseBody(req));
-    await db.collection(entity).updateOne({ _id }, { $set: withUpdateAudit(patch, admin.email) });
+    await db.collection(entity).updateOne({ _id }, { $set: withUpdateAudit(patch, admin.email ?? admin.username) });
     const doc = await db.collection(entity).findOne({ _id });
     return ok(res, { success: true, item: normalizeDoc(doc) });
   }

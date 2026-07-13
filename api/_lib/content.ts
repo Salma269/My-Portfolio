@@ -30,6 +30,7 @@ export function normalizeDocs<T>(docs: unknown[]): T[] {
 export async function ensureIndexes(db: Db): Promise<void> {
   await Promise.all([
     db.collection('projects').createIndex({ slug: 1 }, { unique: true }),
+    db.collection('adminUsers').createIndex({ username: 1 }, { unique: true, sparse: true }),
     db.collection('adminUsers').createIndex({ email: 1 }, { unique: true }),
     db.collection('contactMessages').createIndex({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 }),
     ...collectionNames.map((name) => db.collection(name).createIndex({ order: 1 })),

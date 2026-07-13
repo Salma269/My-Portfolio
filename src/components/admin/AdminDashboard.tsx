@@ -16,7 +16,7 @@ const collections: CollectionName[] = ['projects', 'experiences', 'skills', 'edu
 export function AdminDashboard() {
   const { t } = useTranslation();
   const [session, setSession] = useState<SessionState>('checking');
-  const [email, setEmail] = useState('');
+  const [identity, setIdentity] = useState('');
   const [content, setContent] = useState<PortfolioContent | null>(null);
   const [selectedCollection, setSelectedCollection] = useState<CollectionName>('projects');
   const [dirty, setDirty] = useState(false);
@@ -24,9 +24,9 @@ export function AdminDashboard() {
   useEffect(() => {
     fetch('/api/auth/session', { credentials: 'include' })
       .then((response) => response.json())
-      .then((data: { authenticated: boolean; email?: string }) => {
+      .then((data: { authenticated: boolean; username?: string; email?: string }) => {
         setSession(data.authenticated ? 'authenticated' : 'anonymous');
-        setEmail(data.email ?? '');
+        setIdentity(data.username ?? data.email ?? '');
       })
       .catch(() => setSession('anonymous'));
   }, []);
@@ -66,7 +66,7 @@ export function AdminDashboard() {
     <main className="admin-shell">
       <header className="admin-header">
         <div>
-          <p className="eyebrow">{email}</p>
+          <p className="eyebrow">{identity}</p>
           <h1>{t('admin.dashboard')}</h1>
         </div>
         <div className="admin-header__actions">

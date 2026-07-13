@@ -36,5 +36,6 @@
       ]
     }
   ],
-  "installCommand": "npm ci"
+  "installCommand": "npm ci",
+  "devCommand": "bun dev"
 }

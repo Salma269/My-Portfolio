@@ -6,7 +6,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  username: z.string().min(3).max(254),
   password: z.string().min(8),
 });
 
@@ -28,7 +28,7 @@ export function AdminLogin() {
       body: JSON.stringify(values),
     });
     if (!response.ok) {
-      setError('Invalid credentials or admin bootstrap is not configured.');
+      setError('Invalid username/password or admin bootstrap is not configured.');
       return;
     }
     setAuthenticated(true);
@@ -43,7 +43,7 @@ export function AdminLogin() {
         <div className="brand brand--large"><span className="brand__mark">SM</span><strong>{t('admin.loginTitle')}</strong></div>
         <p>{t('admin.loginSubtitle')}</p>
         <form className="admin-form" onSubmit={handleSubmit(onSubmit)} noValidate>
-          <label>{t('admin.email')}<input type="email" autoComplete="email" {...register('email')} /></label>
+          <label>{t('admin.username')}<input type="text" autoComplete="username" {...register('username')} /></label>
           <label>{t('admin.password')}<input type="password" autoComplete="current-password" {...register('password')} /></label>
           <button className="primary-button" type="submit" disabled={formState.isSubmitting}>{t('admin.signIn')}</button>
           {error ? <p className="form-status form-status--error">{error}</p> : null}
