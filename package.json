@@ -53,7 +53,7 @@
     "vite": "latest"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "packageManager": "npm@11.6.2"
 }
