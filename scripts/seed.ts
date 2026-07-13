@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import { MongoClient } from 'mongodb';
-import { seedContent } from '../shared/seedContent';
-import { collectionNames, ensureIndexes } from '../api/_lib/content';
-import { env } from '../api/_lib/env';
+import { seedContent } from '../shared/seedContent.js';
+import { collectionNames, ensureIndexes } from '../api/_lib/content.js';
+import { env } from '../api/_lib/env.js';
 
 const force = process.argv.includes('--force');
 

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'node:crypto';
-import { env } from './env';
+import { env } from './env.js';
 
 export class HttpError extends Error {
   constructor(

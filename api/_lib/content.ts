@@ -1,6 +1,6 @@
 import { ObjectId, type Collection, type Db } from 'mongodb';
-import type { CollectionName, PortfolioContent } from '../../shared/types';
-import { seedContent } from '../../shared/seedContent';
+import type { CollectionName, PortfolioContent } from '../../shared/types.js';
+import { seedContent } from '../../shared/seedContent.js';
 
 export const collectionNames: CollectionName[] = ['experiences', 'education', 'certifications', 'skills', 'projects'];
 

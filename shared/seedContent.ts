@@ -7,7 +7,7 @@ import type {
   SiteSettings,
   Skill,
   SkillCategoryKey,
-} from './types';
+} from './types.js';
 
 const draft = { ar: 'draft' as const };
 

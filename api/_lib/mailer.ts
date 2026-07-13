@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
-import { env } from './env';
-import { escapeHtml } from './http';
+import { env } from './env.js';
+import { escapeHtml } from './http.js';
 
 export async function sendContactEmail(input: { name: string; email: string; subject: string; message: string }): Promise<void> {
   if (!env.smtpUser || !env.smtpPassword) {

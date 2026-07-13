@@ -1,4 +1,4 @@
-import { HttpError } from './http';
+import { HttpError } from './http.js';
 
 type Entry = { count: number; resetAt: number };
 const buckets = new Map<string, Entry>();

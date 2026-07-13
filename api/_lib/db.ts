@@ -1,5 +1,5 @@
 import { MongoClient, type Db } from 'mongodb';
-import { env, requireEnv } from './env';
+import { env, requireEnv } from './env.js';
 
 type GlobalMongo = typeof globalThis & {
   __salmaMongoClientPromise?: Promise<MongoClient>;

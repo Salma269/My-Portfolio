@@ -3,8 +3,8 @@ import bcrypt from 'bcryptjs';
 import { parseCookie, stringifySetCookie } from 'cookie';
 import jwt from 'jsonwebtoken';
 import type { Db } from 'mongodb';
-import { env, requireEnv } from './env';
-import { HttpError } from './http';
+import { env, requireEnv } from './env.js';
+import { HttpError } from './http.js';
 
 const COOKIE_NAME = 'salma_admin_session';
 const EIGHT_HOURS = 60 * 60 * 8;
