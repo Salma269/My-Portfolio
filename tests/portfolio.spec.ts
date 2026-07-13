@@ -29,10 +29,14 @@ test.describe('public portfolio UX', () => {
     const primaryButton = page.locator('.primary-button').first();
     await primaryButton.focus();
     await expect(primaryButton).toBeFocused();
+    await primaryButton.hover();
+    const hoverColor = await primaryButton.evaluate((node) => getComputedStyle(node).color);
+    expect(hoverColor).not.toBe('rgb(45, 212, 191)');
 
     await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight * 0.45, behavior: 'instant' }));
     await expect(page.locator('#projects')).toBeVisible();
     await expect(page.locator('.project-card__visual img').first()).toBeVisible();
+    await expect.poll(async () => page.locator('.section__heading').first().evaluate((node) => getComputedStyle(node).textAlign)).toBe('center');
   });
 
 
@@ -67,7 +71,7 @@ test.describe('admin CMS login', () => {
     await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page.getByRole('heading', { name: /Dashboard/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('.admin-header .eyebrow')).toHaveText(username);
-    await expect(page.getByText(/Visual editor/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Content Studio/i })).toBeVisible();
     await expect(page.locator('.json-editor')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /Add project/i })).toBeVisible();
     await expect(page.getByLabel(/Cover image URL/i)).toBeVisible();

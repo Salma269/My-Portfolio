@@ -35,6 +35,7 @@ export function AdminDashboard() {
   const [identity, setIdentity] = useState('');
   const [content, setContent] = useState<PortfolioContent | null>(null);
   const [selectedCollection, setSelectedCollection] = useState<CollectionName>('projects');
+  const [activePanel, setActivePanel] = useState<'content' | 'settings'>('content');
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
@@ -99,18 +100,26 @@ export function AdminDashboard() {
       </section>
 
       {content ? (
-        <div className="admin-grid admin-grid--visual">
-          <SiteSettingsEditor content={content} onUpdate={setContent} onDirtyChange={setDirty} />
-          <section className="admin-panel">
-            <div className="admin-panel__heading">
-              <div><p className="eyebrow">{t('admin.contentCollections')}</p><h2>{selectedCollection}</h2></div>
-              <select value={selectedCollection} onChange={(event) => setSelectedCollection(event.target.value as CollectionName)}>
-                {collections.map((collection) => <option key={collection} value={collection}>{collection}</option>)}
-              </select>
-            </div>
-            <CollectionEditor collection={selectedCollection} content={content} onUpdate={setContent} onDirtyChange={setDirty} />
-          </section>
-        </div>
+        <section className="admin-workspace">
+          <div className="admin-workspace__tabs" role="tablist" aria-label="Admin workspace">
+            <button className={activePanel === 'content' ? 'is-active' : ''} type="button" onClick={() => setActivePanel('content')}>Content Studio</button>
+            <button className={activePanel === 'settings' ? 'is-active' : ''} type="button" onClick={() => setActivePanel('settings')}>Site Settings</button>
+          </div>
+
+          {activePanel === 'content' ? (
+            <section className="admin-panel admin-panel--content-studio">
+              <div className="admin-panel__heading admin-panel__heading--studio">
+                <div><p className="eyebrow">{t('admin.contentCollections')}</p><h2>Content Studio</h2></div>
+                <label className="collection-picker">Collection<select value={selectedCollection} onChange={(event) => setSelectedCollection(event.target.value as CollectionName)}>
+                  {collections.map((collection) => <option key={collection} value={collection}>{collection}</option>)}
+                </select></label>
+              </div>
+              <CollectionEditor collection={selectedCollection} content={content} onUpdate={setContent} onDirtyChange={setDirty} />
+            </section>
+          ) : (
+            <SiteSettingsEditor content={content} onUpdate={setContent} onDirtyChange={setDirty} />
+          )}
+        </section>
       ) : <p>Loading CMS snapshot...</p>}
     </main>
   );
