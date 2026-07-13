@@ -582,8 +582,11 @@ a.secondary-button:hover,
   border-radius: var(--radius-md);
   line-height: 1.45;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  justify-content: stretch;
+  gap: .75rem;
+  overflow: hidden;
 }
 .sortable-row .badge { flex-shrink: 0; }
 .sortable-row.is-dragging {
@@ -591,13 +594,14 @@ a.secondary-button:hover,
   box-shadow: var(--shadow-hover);
 }
 .sortable-row__select {
+  width: 100%;
   min-width: 0;
   border: 0;
   background: transparent;
   color: var(--text);
   padding: 0;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: .65rem;
   text-align: start;
@@ -620,12 +624,23 @@ a.secondary-button:hover,
 }
 .sortable-row__label {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+}
+.sortable-row__select .badge {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: .2rem;
 }
 .sortable-row__tools {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: .38rem;
+  width: 100%;
+  min-width: 0;
 }
 .sortable-row__tools .pill-button {
   min-width: 2.35rem;

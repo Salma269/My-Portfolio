@@ -88,6 +88,11 @@ test.describe('admin CMS login', () => {
     await expect(firstCollectionCard.getByRole('button', { name: /to reorder/i })).toBeVisible();
     await expect(firstCollectionCard.getByRole('button', { name: /Move .* up/i })).toBeDisabled();
     await expect(firstCollectionCard.getByRole('button', { name: /Move .* down/i })).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 900 });
+    const compactLabelBox = await firstCollectionCard.locator('.sortable-row__label').boundingBox();
+    expect(compactLabelBox?.width).toBeGreaterThan(120);
+    expect(compactLabelBox?.height).toBeLessThan(110);
+    await page.setViewportSize({ width: 1440, height: 1000 });
     await expect(page.getByText(/Project media/i)).toBeVisible();
     await expect(page.getByText(/Images & cover/i)).toBeVisible();
     await expect(page.getByText('Attach image', { exact: true })).toBeVisible();
