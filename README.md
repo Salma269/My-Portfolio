@@ -70,24 +70,27 @@ The CV is served at `/cv` and redirects to the bundled `public/cv.pdf`; the foot
 
 ### Auto-deploy on push (GitHub Actions)
 
-Pushes to `main` trigger [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), which typechecks, builds, and deploys to Vercel production. Pull requests get preview deployments.
+Pushes to `main` trigger [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), which typechecks, builds, and deploys to **https://salma-mohamed.com**.
 
-Add these GitHub repository secrets (**Settings → Secrets and variables → Actions**):
+Add **one** GitHub repository secret (**Settings → Secrets and variables → Actions**):
 
-| Secret | Where to find it |
+| Secret | How to create |
 |---|---|
-| `VERCEL_TOKEN` | [Vercel account tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID` | Vercel project **Settings → General** (Team/Account ID) |
-| `VERCEL_PROJECT_ID` | Vercel project **Settings → General** (Project ID) |
+| `VERCEL_TOKEN` | [vercel.com/account/tokens](https://vercel.com/account/tokens) → Create Token |
 
-One-time Vercel setup:
+The workflow already includes the linked Vercel project IDs (`salma-portfolio`).
 
-1. Import `https://github.com/Salma269/My-Portfolio` in [Vercel](https://vercel.com/new).
-2. Add production environment variables from [`.env.example`](.env.example) in **Project Settings → Environment Variables**.
-3. Copy the org and project IDs into the GitHub secrets above.
-4. Point `salma-mohamed.com` to Vercel in your DNS provider.
+After adding `VERCEL_TOKEN`, re-run the failed workflow from the **Actions** tab or push any commit to `main`.
 
-Use **either** Vercel's built-in Git integration **or** this GitHub Action workflow, not both, to avoid duplicate deployments.
+### Manual deploy
+
+```bash
+npx vercel deploy --prod
+```
+
+### Vercel environment variables
+
+Add production values from [`.env.example`](.env.example) in **Vercel → salma-portfolio → Settings → Environment Variables**.
 
 ### Build settings
 
