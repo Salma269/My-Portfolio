@@ -78,10 +78,17 @@ test.describe('admin CMS login', () => {
     await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page.getByRole('heading', { name: /Dashboard/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('.admin-header .eyebrow')).toHaveText(username);
+    const pageErrors: string[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
     await expect(page.getByRole('heading', { name: /Content Studio/i })).toBeVisible();
     await expect(page.locator('.json-editor')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /Add project/i })).toBeVisible();
     await expect(page.getByLabel(/Cover image URL/i)).toBeVisible();
     await expect(page.getByLabel(/Gallery image URLs/i)).toBeVisible();
+    await page.getByLabel(/Collection/i).selectOption('skills');
+    await expect(page.getByRole('button', { name: /Add skill/i })).toBeVisible();
+    await page.getByLabel(/Collection/i).selectOption('certifications');
+    await expect(page.getByRole('button', { name: /Add certification/i })).toBeVisible();
+    expect(pageErrors).toEqual([]);
   });
 });

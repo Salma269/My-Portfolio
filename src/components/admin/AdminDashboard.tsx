@@ -114,7 +114,7 @@ export function AdminDashboard() {
                   {collections.map((collection) => <option key={collection} value={collection}>{collection}</option>)}
                 </select></label>
               </div>
-              <CollectionEditor collection={selectedCollection} content={content} onUpdate={setContent} onDirtyChange={setDirty} />
+              <CollectionEditor key={selectedCollection} collection={selectedCollection} content={content} onUpdate={setContent} onDirtyChange={setDirty} />
             </section>
           ) : (
             <SiteSettingsEditor content={content} onUpdate={setContent} onDirtyChange={setDirty} />
@@ -434,10 +434,11 @@ function CertificationForm({ item, onChange, common }: { item: Certification; on
   );
 }
 
-function LocalizedFields({ label, value, multiline = false, onChange }: { label: string; value: LocalizedString; multiline?: boolean; onChange: (value: LocalizedString) => void }) {
+function LocalizedFields({ label, value, multiline = false, onChange }: { label: string; value?: LocalizedString; multiline?: boolean; onChange: (value: LocalizedString) => void }) {
+  const safeValue = value ?? emptyLocalized();
   const field = (locale: keyof LocalizedString) => {
-    const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange({ ...value, [locale]: event.target.value });
-    return multiline ? <textarea rows={locale === 'en' ? 4 : 3} value={value[locale]} onChange={handleChange} /> : <input value={value[locale]} onChange={handleChange} />;
+    const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange({ ...safeValue, [locale]: event.target.value });
+    return multiline ? <textarea rows={locale === 'en' ? 4 : 3} value={safeValue[locale]} onChange={handleChange} /> : <input value={safeValue[locale]} onChange={handleChange} />;
   };
   return (
     <fieldset className="localized-field">
@@ -448,18 +449,20 @@ function LocalizedFields({ label, value, multiline = false, onChange }: { label:
   );
 }
 
-function LocalizedArrayFields({ label, value, onChange }: { label: string; value: { en: string[]; ar: string[] }; onChange: (value: { en: string[]; ar: string[] }) => void }) {
+function LocalizedArrayFields({ label, value, onChange }: { label: string; value?: { en: string[]; ar: string[] }; onChange: (value: { en: string[]; ar: string[] }) => void }) {
+  const safeValue = value ?? emptyArray();
   return (
     <fieldset className="localized-field localized-field--array">
       <legend>{label}</legend>
-      <label>English<textarea rows={5} value={value.en.join('\n')} onChange={(event) => onChange({ ...value, en: splitLines(event.target.value) })} /></label>
-      <label>Arabic draft<textarea rows={5} value={value.ar.join('\n')} onChange={(event) => onChange({ ...value, ar: splitLines(event.target.value) })} /></label>
+      <label>English<textarea rows={5} value={safeValue.en.join('\n')} onChange={(event) => onChange({ ...safeValue, en: splitLines(event.target.value) })} /></label>
+      <label>Arabic draft<textarea rows={5} value={safeValue.ar.join('\n')} onChange={(event) => onChange({ ...safeValue, ar: splitLines(event.target.value) })} /></label>
     </fieldset>
   );
 }
 
 function ProjectPreview({ project }: { project: Project }) {
-  const images = project.gallery.length ? project.gallery : project.coverImage ? [project.coverImage] : [];
+  const gallery = project.gallery ?? [];
+  const images = gallery.length ? gallery : project.coverImage ? [project.coverImage] : [];
   if (!images.length) return null;
   return (
     <div className="admin-project-preview">
