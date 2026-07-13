@@ -608,6 +608,167 @@ textarea { line-height: 1.65; }
 .admin-project-preview img { border-radius: var(--radius-md); }
 .admin-panel--settings .admin-form-grid { grid-template-columns: repeat(2, minmax(280px, 1fr)); }
 
+.project-image-manager {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1rem;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, var(--accent));
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+.project-image-manager__heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.project-image-manager__heading h3 {
+  margin: .1rem 0 .2rem;
+  font-size: 1.22rem;
+  line-height: 1.2;
+}
+
+.project-image-manager__heading p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted);
+}
+
+.attach-image-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 46%, var(--border));
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #02131a;
+  padding: .8rem 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--accent) 18%, transparent);
+  transition: transform var(--transition), filter var(--transition), opacity var(--transition);
+}
+
+.attach-image-button:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.04) contrast(1.05);
+}
+
+.attach-image-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.attach-image-button:has(input:disabled) {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+.attach-image-button:has(input:disabled) input {
+  cursor: not-allowed;
+}
+
+.image-url-adder {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .75rem;
+  align-items: end;
+}
+
+.project-image-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.project-image-card {
+  display: grid;
+  gap: .65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .65rem;
+  background: color-mix(in srgb, var(--surface-strong) 70%, transparent);
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.project-image-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.project-image-card.is-cover {
+  border-color: color-mix(in srgb, var(--accent) 74%, var(--border));
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.project-image-card__cover-button {
+  display: grid;
+  gap: .55rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 0;
+  text-align: start;
+}
+
+.project-image-card__cover-button img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: .85rem;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+}
+
+.project-image-card__cover-button span {
+  width: max-content;
+  max-width: 100%;
+  border: 1px solid color-mix(in srgb, var(--accent) 46%, var(--border));
+  border-radius: 999px;
+  padding: .38rem .62rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 900;
+}
+
+.project-image-card__cover-button:hover span {
+  color: #02131a;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.project-image-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.project-image-card__actions .pill-button {
+  min-width: 42px;
+}
+
+.project-image-card__actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.project-image-empty {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  color: var(--muted);
+  text-align: center;
+  background: color-mix(in srgb, var(--surface-strong) 40%, transparent);
+}
+
 @media (max-width: 1100px) {
   .admin-shell { width: min(100% - 2rem, 980px); }
   .admin-panel__heading--studio,
@@ -622,6 +783,10 @@ textarea { line-height: 1.65; }
   .admin-workspace__tabs { width: 100%; }
   .admin-workspace__tabs button { flex: 1; }
   .admin-form-grid--compact { grid-template-columns: 1fr; }
+  .project-image-manager__heading,
+  .image-url-adder { grid-template-columns: 1fr; }
+  .project-image-manager__heading { display: grid; }
+  .project-image-list { grid-template-columns: 1fr; }
 }
 
 /* RTL hero: mirror the 3D engineering scene so Arabic copy owns the right side. */

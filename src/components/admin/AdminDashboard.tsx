@@ -347,10 +347,76 @@ function CommonFields({ item, onChange }: { item: EditableRecord; onChange: (ite
 }
 
 function ProjectForm({ item, onChange, common }: { item: Project; onChange: (item: Project) => void; common: React.ReactNode }) {
-  const galleryText = item.gallery.map((image) => image.blobUrl).join('\n');
-  const coverUrl = item.coverImage?.blobUrl ?? '';
-  const setGallery = (value: string) => onChange({ ...item, gallery: splitLines(value).map((url, index) => makeProjectImage(url, item, index + 1, `Gallery ${index + 1}`)) });
-  const setCover = (value: string) => onChange({ ...item, coverImage: value.trim() ? makeProjectImage(value.trim(), item, 0, 'Cover') : undefined });
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const gallery: ProjectImage[] = normalizeProjectImages([...(item.coverImage ? [item.coverImage] : []), ...(item.gallery ?? [])]);
+  const coverKey = item.coverImage ? imageKey(item.coverImage) : '';
+
+  const syncGallery = (images: ProjectImage[], patch: Partial<Project> = {}) => {
+    const normalized = normalizeProjectImages(images);
+    onChange({ ...item, gallery: normalized, ...patch });
+  };
+
+  const addUrlImage = () => {
+    const url = imageUrl.trim();
+    if (!url) return;
+    const image = makeProjectImage(url, item, gallery.length + 1, `Gallery ${gallery.length + 1}`);
+    syncGallery([...gallery, image], item.coverImage ? {} : { coverImage: image });
+    setImageUrl('');
+  };
+
+  const uploadImage = async (file?: File) => {
+    if (!file) return;
+    if (!item._id) {
+      toast.error('Save the project before attaching uploaded files.');
+      return;
+    }
+    try {
+      setUploading(true);
+      const fileBase64 = await readFileBase64(file);
+      const response = await fetch('/api/admin/media/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          projectId: item._id,
+          purpose: 'gallery',
+          fileName: file.name,
+          mimeType: file.type,
+          fileBase64,
+          alt: { en: `${item.title.en} image`, ar: item.title.ar ? `${item.title.ar} صورة` : '' },
+        }),
+      });
+      if (!response.ok) throw new Error('Could not upload image');
+      const data = (await response.json()) as { image: ProjectImage };
+      syncGallery([...gallery, data.image], item.coverImage ? {} : { coverImage: data.image });
+      toast.success('Image attached. Save to persist image ordering/cover changes.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const setCover = (image: ProjectImage) => onChange({ ...item, coverImage: image });
+
+  const removeImage = (image: ProjectImage) => {
+    const key = imageKey(image);
+    const nextGallery = gallery.filter((candidate) => imageKey(candidate) !== key).map((candidate, index) => ({ ...candidate, order: index + 1 }));
+    const nextCover = coverKey === key ? nextGallery[0] : item.coverImage;
+    syncGallery(nextGallery, { coverImage: nextCover });
+  };
+
+  const moveImage = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= gallery.length) return;
+    const nextGallery = [...gallery];
+    const [image] = nextGallery.splice(index, 1);
+    if (!image) return;
+    nextGallery.splice(target, 0, image);
+    syncGallery(nextGallery.map((candidate, orderIndex) => ({ ...candidate, order: orderIndex + 1 })));
+  };
+
   return (
     <div className="admin-visual-form">
       {common}
@@ -366,10 +432,57 @@ function ProjectForm({ item, onChange, common }: { item: Project; onChange: (ite
         <label>Technologies <small>Comma or newline separated</small><textarea rows={3} value={item.technologies.join(', ')} onChange={(event) => onChange({ ...item, technologies: splitTokens(event.target.value) })} /></label>
         <label>Repo URL<input value={item.repoUrl ?? ''} onChange={(event) => onChange({ ...item, repoUrl: event.target.value || undefined })} /></label>
         <label>Live URL<input value={item.liveUrl ?? ''} onChange={(event) => onChange({ ...item, liveUrl: event.target.value || undefined })} /></label>
-        <label>Cover image URL<input value={coverUrl} onChange={(event) => setCover(event.target.value)} /></label>
-        <label>Gallery image URLs <small>One per line. Use /project-assets/... or HTTPS URLs.</small><textarea rows={4} value={galleryText} onChange={(event) => setGallery(event.target.value)} /></label>
       </div>
-      <ProjectPreview project={item} />
+
+      <section className="project-image-manager" aria-label="Project images manager">
+        <div className="project-image-manager__heading">
+          <div>
+            <p className="eyebrow">Project media</p>
+            <h3>Images & cover</h3>
+            <p>Attach images, reorder the gallery, delete images, and choose the cover from the image list.</p>
+          </div>
+          <label className="attach-image-button">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/avif"
+              onChange={(event) => {
+                void uploadImage(event.target.files?.[0]);
+                event.currentTarget.value = '';
+              }}
+              disabled={uploading || !item._id}
+            />
+            {uploading ? 'Uploading...' : 'Attach image'}
+          </label>
+        </div>
+
+        <div className="image-url-adder">
+          <label>Add image URL<input value={imageUrl} placeholder="/project-assets/example.svg or https://..." onChange={(event) => setImageUrl(event.target.value)} /></label>
+          <button className="secondary-button" type="button" onClick={addUrlImage}>Add image</button>
+        </div>
+
+        {gallery.length ? (
+          <div className="project-image-list">
+            {gallery.map((image, index) => {
+              const isCover = coverKey === imageKey(image);
+              return (
+                <article className={`project-image-card ${isCover ? 'is-cover' : ''}`} key={imageKey(image)}>
+                  <button className="project-image-card__cover-button" type="button" onClick={() => setCover(image)} aria-pressed={isCover}>
+                    <img src={image.blobUrl} alt={image.alt.en || item.title.en} />
+                    <span>{isCover ? 'Cover photo' : 'Make cover'}</span>
+                  </button>
+                  <div className="project-image-card__actions">
+                    <button type="button" className="pill-button" onClick={() => moveImage(index, -1)} disabled={index === 0} aria-label="Move image up">↑</button>
+                    <button type="button" className="pill-button" onClick={() => moveImage(index, 1)} disabled={index === gallery.length - 1} aria-label="Move image down">↓</button>
+                    <button type="button" className="secondary-button" onClick={() => removeImage(image)}>Delete image</button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="project-image-empty">No project images yet. Attach a file or add an image URL.</div>
+        )}
+      </section>
     </div>
   );
 }
@@ -460,17 +573,6 @@ function LocalizedArrayFields({ label, value, onChange }: { label: string; value
   );
 }
 
-function ProjectPreview({ project }: { project: Project }) {
-  const gallery = project.gallery ?? [];
-  const images = gallery.length ? gallery : project.coverImage ? [project.coverImage] : [];
-  if (!images.length) return null;
-  return (
-    <div className="admin-project-preview">
-      {images.slice(0, 4).map((image) => <img key={image.id} src={image.blobUrl} alt={image.alt.en} />)}
-    </div>
-  );
-}
-
 function SortableRow({ id, item, selected, onClick }: { id: string; item: EditableRecord; selected: boolean; onClick: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
@@ -542,6 +644,35 @@ function splitTokens(value: string): string[] {
 
 function slugify(value: string): string {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80) || 'new-project';
+}
+
+function imageKey(image: ProjectImage): string {
+  return image.id || image.pathname || image.blobUrl;
+}
+
+function normalizeProjectImages(images: ProjectImage[]): ProjectImage[] {
+  const seen = new Set<string>();
+  return images
+    .filter((image): image is ProjectImage => Boolean(image?.blobUrl))
+    .filter((image) => {
+      const key = imageKey(image);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((image, index) => ({ ...image, order: index + 1 }));
+}
+
+function readFileBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read image file.'));
+    reader.onload = () => {
+      const result = String(reader.result ?? '');
+      resolve(result.includes(',') ? result.split(',')[1] ?? '' : result);
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function makeProjectImage(url: string, project: Project, order: number, label: string): ProjectImage {
