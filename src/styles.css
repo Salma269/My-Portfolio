@@ -623,3 +623,18 @@ textarea { line-height: 1.65; }
   .admin-workspace__tabs button { flex: 1; }
   .admin-form-grid--compact { grid-template-columns: 1fr; }
 }
+
+/* RTL hero: mirror the 3D engineering scene so Arabic copy owns the right side. */
+[dir="rtl"] .hero-bg canvas {
+  transform: translateX(-38%);
+}
+[dir="rtl"] .hero-bg__fallback {
+  inset: 6% 38% 0 -16%;
+}
+@media (max-width: 900px) {
+  [dir="rtl"] .hero-bg canvas { transform: translateX(-18%); opacity: .34; }
+  [dir="rtl"] .hero-bg__fallback { inset: 0; }
+}
+@media (max-width: 620px) {
+  [dir="rtl"] .hero-bg canvas { transform: translateX(-6%); opacity: .22; }
+}

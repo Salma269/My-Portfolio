@@ -53,6 +53,13 @@ test.describe('public portfolio UX', () => {
     await page.goto('/');
     await page.getByRole('button', { name: /العربية/i }).click();
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+    if ((page.viewportSize()?.width ?? 0) >= 760) {
+      const translateX = await page.locator('.hero-bg canvas').evaluate((node) => {
+        const transform = getComputedStyle(node).transform;
+        return transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m41;
+      });
+      expect(translateX).toBeLessThan(0);
+    }
     await expect(page.getByRole('navigation')).toBeVisible();
     await expect(page.getByRole('button', { name: /English/i })).toBeVisible();
   });
