@@ -68,6 +68,29 @@ The CV is served at `/cv` and redirects to the bundled `public/cv.pdf`; the foot
 
 ## Deployment notes
 
+### Auto-deploy on push (GitHub Actions)
+
+Pushes to `main` trigger [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), which typechecks, builds, and deploys to Vercel production. Pull requests get preview deployments.
+
+Add these GitHub repository secrets (**Settings → Secrets and variables → Actions**):
+
+| Secret | Where to find it |
+|---|---|
+| `VERCEL_TOKEN` | [Vercel account tokens](https://vercel.com/account/tokens) |
+| `VERCEL_ORG_ID` | Vercel project **Settings → General** (Team/Account ID) |
+| `VERCEL_PROJECT_ID` | Vercel project **Settings → General** (Project ID) |
+
+One-time Vercel setup:
+
+1. Import `https://github.com/Salma269/My-Portfolio` in [Vercel](https://vercel.com/new).
+2. Add production environment variables from [`.env.example`](.env.example) in **Project Settings → Environment Variables**.
+3. Copy the org and project IDs into the GitHub secrets above.
+4. Point `salma-mohamed.com` to Vercel in your DNS provider.
+
+Use **either** Vercel's built-in Git integration **or** this GitHub Action workflow, not both, to avoid duplicate deployments.
+
+### Build settings
+
 - Vercel build command: `npm run build`
 - Output directory: `dist`
 - Serverless API routes: `/api/*`
