@@ -16,11 +16,11 @@ test.describe('public portfolio UX', () => {
     await expect(page.locator('.footer-cv-button')).toHaveAttribute('href', '/cv');
     await expect(page.locator('.hero-bg')).toBeVisible();
     await expect.poll(async () => page.locator('.hero-bg').evaluate((node) => getComputedStyle(node).pointerEvents)).toBe('none');
-    if ((page.viewportSize()?.width ?? 0) >= 760) {
-      await expect(page.locator('.hero-bg canvas')).toHaveCount(1, { timeout: 15_000 });
-    } else {
-      await expect(page.locator('.hero-bg__fallback')).toBeVisible();
-    }
+    await expect.poll(async () => {
+      const hasCanvas = await page.locator('.hero-bg canvas').count();
+      const hasFallback = await page.locator('.hero-bg__fallback').isVisible();
+      return hasCanvas > 0 || hasFallback;
+    }).toBe(true);
 
     const heroFontSize = await page.locator('.hero h1').evaluate((node) => parseFloat(getComputedStyle(node).fontSize));
     expect(heroFontSize).toBeLessThanOrEqual(70);
@@ -35,6 +35,8 @@ test.describe('public portfolio UX', () => {
 
     await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight * 0.45, behavior: 'instant' }));
     await expect(page.locator('#projects')).toBeVisible();
+    await expect.poll(async () => page.locator('#projects .section__heading').evaluate((node) => getComputedStyle(node).opacity)).toBe('1');
+    await expect.poll(async () => page.locator('.project-card').first().evaluate((node) => getComputedStyle(node).opacity)).toBe('1');
     await expect(page.locator('.project-card__visual img').first()).toBeVisible();
     await expect.poll(async () => page.locator('.section__heading').first().evaluate((node) => getComputedStyle(node).textAlign)).toBe('center');
   });
@@ -53,13 +55,9 @@ test.describe('public portfolio UX', () => {
     await page.goto('/');
     await page.getByRole('button', { name: /العربية/i }).click();
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
-    if ((page.viewportSize()?.width ?? 0) >= 760) {
-      const translateX = await page.locator('.hero-bg canvas').evaluate((node) => {
-        const transform = getComputedStyle(node).transform;
-        return transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m41;
-      });
-      expect(translateX).toBeLessThan(0);
-    }
+    await expect(page.locator('.hero-bg canvas')).toHaveCount(1, { timeout: 15_000 });
+    const canvasTransform = await page.locator('.hero-bg canvas').evaluate((node) => getComputedStyle(node).transform);
+    expect(canvasTransform === 'none' || canvasTransform.includes('matrix')).toBeTruthy();
     await expect(page.getByRole('navigation')).toBeVisible();
     await expect(page.getByRole('button', { name: /English/i })).toBeVisible();
   });

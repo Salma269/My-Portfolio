@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AdminDashboard } from '../components/admin/AdminDashboard';
 import { AdminLogin } from '../components/admin/AdminLogin';
@@ -9,6 +9,16 @@ import { ProjectDetailPage } from '../components/public/ProjectDetailPage';
 import { setDocumentLanguage } from '../features/i18n/config';
 import { ThemeProvider } from '../features/theme/ThemeProvider';
 import type { Locale } from '../types/cms';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname]);
+
+  return null;
+}
 
 export function App() {
   const { i18n } = useTranslation();
@@ -23,6 +33,7 @@ export function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<PortfolioPage />} />
           <Route path="/projects/:slug" element={<ProjectDetailPage />} />

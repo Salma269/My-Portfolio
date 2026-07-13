@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HeroBackground } from './HeroBackground';
 import { PublicHeader } from './PublicHeader';
@@ -6,34 +5,17 @@ import { ProjectsCarousel } from './ProjectsCarousel';
 import { ContactForm } from './ContactForm';
 import { skillCategoryLabels } from '../../data/fallbackContent';
 import { useContent } from '../../hooks/useContent';
+import { useRevealOnScroll } from '../../hooks/useRevealOnScroll';
 import type { Locale, SectionKey, SkillCategoryKey } from '../../types/cms';
 import { pickLocalized, pickLocalizedArray } from '../../utils/localize';
+import { contentAttrs } from '../../utils/localeContent';
 
 export function PortfolioPage() {
   const { t, i18n } = useTranslation();
   const locale = (i18n.language.startsWith('ar') ? 'ar' : 'en') as Locale;
   const { content } = useContent();
 
-  useEffect(() => {
-    const elements = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
-    if (!('IntersectionObserver' in window)) {
-      elements.forEach((element) => element.classList.add('is-visible'));
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { rootMargin: '-8% 0px -10% 0px', threshold: 0.12 },
-    );
-    elements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
-  }, [content]);
+  useRevealOnScroll([content, locale]);
   const { siteSettings } = content;
   const orderedSections = Object.entries(siteSettings.sections)
     .filter(([, config]) => config.visible)
@@ -46,7 +28,7 @@ export function PortfolioPage() {
       <main id="main">
         <section className="hero shell" id="top">
           <HeroBackground />
-          <div className="hero__content">
+          <div className="hero__content" {...contentAttrs(locale, siteSettings.hero.subtitle, siteSettings.localeStatus, true)}>
             <p className="eyebrow">{pickLocalized(siteSettings.hero.eyebrow, locale, siteSettings.localeStatus, true)}</p>
             <h1>
               <span>Salma Mohamed Sayed</span>
@@ -72,7 +54,7 @@ export function PortfolioPage() {
         </section>
 
         <Section id="about" title={pickLocalized(siteSettings.about.heading, locale, siteSettings.localeStatus, true)} eyebrow={t('labels.cvSource')}>
-          <div className="about-panel">
+          <div className="about-panel reveal" {...contentAttrs(locale, siteSettings.about.body, siteSettings.localeStatus, true)}>
             <p>{pickLocalized(siteSettings.about.body, locale, siteSettings.localeStatus, true)}</p>
           </div>
         </Section>
@@ -99,7 +81,7 @@ export function PortfolioPage() {
       <Section id="experience" title={t('sections.experience')} eyebrow="Training">
         <div className="timeline">
           {content.experiences.map((experience) => (
-            <article className="timeline-card reveal" key={`${experience.title.en}-${experience.periodLabel}`}>
+            <article className="timeline-card reveal" key={`${experience.title.en}-${experience.periodLabel}`} {...contentAttrs(localeValue, experience.title, experience.localeStatus)}>
               <div className="timeline-card__period">{experience.periodLabel}</div>
               <h3>{pickLocalized(experience.title, localeValue, experience.localeStatus)}</h3>
               <p className="timeline-card__org">{pickLocalized(experience.organization, localeValue, experience.localeStatus)}</p>
@@ -121,7 +103,7 @@ export function PortfolioPage() {
       <Section id="skills" title={t('sections.skills')} eyebrow="Stack">
         <div className="skills-grid">
           {(Object.keys(grouped) as SkillCategoryKey[]).map((category) => (
-            <article className="skill-card reveal" key={category}>
+            <article className="skill-card reveal" key={category} {...contentAttrs(localeValue, { en: skillCategoryLabels[category].en, ar: skillCategoryLabels[category].ar }, { ar: 'approved' }, true)}>
               <h3>{skillCategoryLabels[category][localeValue]}</h3>
               <div className="chip-list">
                 {grouped[category].map((skill) => (
@@ -148,7 +130,7 @@ export function PortfolioPage() {
       <Section id="education" title={t('sections.education')} eyebrow="Academic">
         <div className="cards-grid cards-grid--two">
           {content.education.map((item) => (
-            <article className="info-card reveal" key={item.degree.en}>
+            <article className="info-card reveal" key={item.degree.en} {...contentAttrs(localeValue, item.degree, item.localeStatus)}>
               <h3>{pickLocalized(item.institution, localeValue, item.localeStatus)}</h3>
               <p>{pickLocalized(item.degree, localeValue, item.localeStatus)}</p>
               <div className="info-card__meta"><span>{t('labels.graduation')}: {item.graduationDate}</span>{item.gpa ? <span>{t('labels.gpa')}: {item.gpa}</span> : null}</div>
@@ -164,7 +146,7 @@ export function PortfolioPage() {
       <Section id="certifications" title={t('sections.certifications')} eyebrow="Credentials">
         <div className="cards-grid cards-grid--four">
           {content.certifications.map((item) => (
-            <article className="info-card reveal" key={item.name.en}>
+            <article className="info-card reveal" key={item.name.en} {...contentAttrs(localeValue, item.name, item.localeStatus)}>
               <h3>{pickLocalized(item.name, localeValue, item.localeStatus)}</h3>
               <p>{item.details ? pickLocalized(item.details, localeValue, item.localeStatus) : item.dateLabel}</p>
             </article>
@@ -186,8 +168,8 @@ function Metric({ value, label }: { value: string; label: string }) {
 
 function Section({ id, title, eyebrow, children }: { id: string; title: string; eyebrow: string; children: React.ReactNode }) {
   return (
-    <section className="section shell reveal" id={id}>
-      <div className="section__heading">
+    <section className="section shell" id={id}>
+      <div className="section__heading reveal">
         <p className="eyebrow">{eyebrow}</p>
         <h2>{title}</h2>
       </div>

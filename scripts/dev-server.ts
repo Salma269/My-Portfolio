@@ -1,13 +1,35 @@
 import 'dotenv/config';
 import http, { type IncomingMessage, type ServerResponse } from 'node:http';
+import os from 'node:os';
 import { createServer as createViteServer } from 'vite';
 import apiHandler from '../api/[...path]';
 
-const host = '127.0.0.1';
+function getLocalIPv4(): string | undefined {
+  for (const iface of Object.values(os.networkInterfaces())) {
+    if (!iface) continue;
+    for (const details of iface) {
+      if (details.family === 'IPv4' && !details.internal) return details.address;
+    }
+  }
+  return undefined;
+}
+
+const bindHost = process.env.HOST ?? '0.0.0.0';
+const localIp = getLocalIPv4() ?? '127.0.0.1';
 const port = Number(process.env.PORT ?? 5173);
 
+const server = http.createServer();
+
 const vite = await createViteServer({
-  server: { middlewareMode: true, host, hmr: { host } },
+  server: {
+    middlewareMode: { server },
+    host: bindHost,
+    hmr: {
+      server,
+      host: localIp !== '127.0.0.1' ? localIp : undefined,
+      port,
+    },
+  },
   appType: 'spa',
 });
 
@@ -58,8 +80,8 @@ async function handleApi(req: IncomingMessage, res: ServerResponse, url: URL): P
   }
 }
 
-const server = http.createServer((req, res) => {
-  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? `${host}:${port}`}`);
+server.on('request', (req, res) => {
+  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? `${localIp}:${port}`}`);
   if (url.pathname === '/cv') {
     res.statusCode = 302;
     res.setHeader('Location', '/cv.pdf');
@@ -76,8 +98,10 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(port, host, () => {
-  console.log(`Salma portfolio dev server ready: http://${host}:${port}`);
+server.listen(port, bindHost, () => {
+  console.log('Salma portfolio dev server ready:');
+  console.log(`  Local:   http://127.0.0.1:${port}`);
+  if (localIp !== '127.0.0.1') console.log(`  Network: http://${localIp}:${port}`);
   console.log('Vite SPA + local Vercel-compatible API are served by bun dev.');
 });
 
